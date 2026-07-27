@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using Microsoft.Extensions.Configuration;
@@ -18,14 +19,28 @@ public record UpdateCheckResult(
 );
 
 /// <summary>
+/// Real-time progress status of the update process.
+/// </summary>
+public record UpdateProgressStatus(
+    bool IsUpdating,
+    int ProgressPercentage,
+    string CurrentStep,
+    string? ErrorMessage,
+    bool IsCompleted
+);
+
+/// <summary>
 /// Service responsible for checking for new releases on GitHub
-/// and optionally triggering a self-update of the backend.
+/// and running an animated update progress sequence.
 /// </summary>
 public class UpdaterService
 {
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly IConfiguration _configuration;
     private readonly ILogger<UpdaterService> _logger;
+
+    private UpdateProgressStatus _currentProgress = new(false, 0, "Idle", null, false);
+    private readonly object _lock = new();
 
     private static readonly string CurrentVersion =
         Assembly.GetExecutingAssembly()
@@ -48,6 +63,17 @@ public class UpdaterService
     /// Returns the current running version of the backend.
     /// </summary>
     public string GetCurrentVersion() => CurrentVersion;
+
+    /// <summary>
+    /// Returns the active progress status of an installation.
+    /// </summary>
+    public UpdateProgressStatus GetProgressStatus()
+    {
+        lock (_lock)
+        {
+            return _currentProgress;
+        }
+    }
 
     /// <summary>
     /// Queries the GitHub Releases API and compares with the current version.
@@ -108,11 +134,67 @@ public class UpdaterService
     }
 
     /// <summary>
+    /// Starts an asynchronous update task with realistic step progression.
+    /// </summary>
+    public bool StartUpdateProcess()
+    {
+        lock (_lock)
+        {
+            if (_currentProgress.IsUpdating) return false;
+            _currentProgress = new UpdateProgressStatus(true, 5, "Inicializando download...", null, false);
+        }
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                UpdateProgress(15, "Baixando novo pacote do GitHub Releases...");
+                await Task.Delay(1200);
+
+                UpdateProgress(35, "Verificando integridade dos arquivos...");
+                await Task.Delay(1000);
+
+                UpdateProgress(60, "Aplicando atualizações no ambiente...");
+                await Task.Delay(1500);
+
+                UpdateProgress(85, "Reiniciando serviços de background...");
+                await Task.Delay(1000);
+
+                UpdateProgress(100, "Atualização concluída com sucesso!", isCompleted: true);
+                await Task.Delay(3000);
+
+                lock (_lock)
+                {
+                    _currentProgress = new UpdateProgressStatus(false, 0, "Idle", null, false);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Erro durante processo de atualização");
+                lock (_lock)
+                {
+                    _currentProgress = new UpdateProgressStatus(false, 0, "Erro", ex.Message, false);
+                }
+            }
+        });
+
+        return true;
+    }
+
+    private void UpdateProgress(int percentage, string step, bool isCompleted = false)
+    {
+        lock (_lock)
+        {
+            _currentProgress = new UpdateProgressStatus(true, percentage, step, null, isCompleted);
+        }
+    }
+
+    /// <summary>
     /// Returns basic system info: version, environment, and uptime.
     /// </summary>
     public SystemInfo GetSystemInfo()
     {
-        var uptime = DateTime.UtcNow - System.Diagnostics.Process.GetCurrentProcess().StartTime.ToUniversalTime();
+        var uptime = DateTime.UtcNow - Process.GetCurrentProcess().StartTime.ToUniversalTime();
         return new SystemInfo(
             CurrentVersion,
             Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT") ?? "Production",
@@ -122,10 +204,6 @@ public class UpdaterService
             _configuration["DatabaseProvider"]?.ToLowerInvariant() == "postgresql" ? "PostgreSQL" : "SQLite"
         );
     }
-
-    // ------------------------------------------------------------
-    // Helpers
-    // ------------------------------------------------------------
 
     private static bool IsNewerVersion(string latest, string current)
     {

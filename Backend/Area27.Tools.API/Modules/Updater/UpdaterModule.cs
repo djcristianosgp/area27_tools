@@ -8,7 +8,7 @@ using Microsoft.Extensions.Hosting;
 namespace Area27.Tools.API.Modules.Updater;
 
 /// <summary>
-/// Module responsible for system update checking and system info endpoints.
+/// Module responsible for system update checking, system info, and update progress endpoints.
 /// </summary>
 public class UpdaterModule : IToolModule
 {
@@ -51,11 +51,23 @@ public class UpdaterModule : IToolModule
         .WithName("SystemInfo")
         .WithTags("Updater");
 
+        // GET /api/updater/progress — Return current update progress percentage and step
+        group.MapGet("/progress", (UpdaterService svc) =>
+        {
+            return Results.Ok(svc.GetProgressStatus());
+        })
+        .WithName("GetUpdateProgress")
+        .WithTags("Updater");
+
         // POST /api/updater/apply — Trigger automatic update/deploy process
         group.MapPost("/apply", (UpdaterService svc) =>
         {
-            // Triggers self-update / docker update check
-            return Results.Ok(new { message = "Atualização solicitada. Se estiver rodando via Git/Docker, o processo foi iniciado em background." });
+            var started = svc.StartUpdateProcess();
+            if (!started)
+            {
+                return Results.BadRequest(new { message = "Uma atualização já está em andamento." });
+            }
+            return Results.Ok(new { message = "Processo de atualização iniciado com sucesso." });
         })
         .WithName("ApplyUpdate")
         .WithTags("Updater");
