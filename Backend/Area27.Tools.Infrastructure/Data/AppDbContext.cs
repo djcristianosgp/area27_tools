@@ -12,6 +12,8 @@ public class AppDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Setting> Settings => Set<Setting>();
     public DbSet<ToolModuleState> Modules => Set<ToolModuleState>();
+    public DbSet<UptimeCheck> UptimeChecks => Set<UptimeCheck>();
+    public DbSet<UptimeHistory> UptimeHistories => Set<UptimeHistory>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
