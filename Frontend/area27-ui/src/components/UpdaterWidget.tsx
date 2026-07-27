@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
 import { RefreshCw, CheckCircle, AlertTriangle, ExternalLink, Loader2, Info, Download, CheckCircle2 } from 'lucide-react';
 
@@ -47,6 +47,8 @@ export const UpdaterWidget: React.FC = () => {
     staleTime: 1000 * 60 * 10, // Re-check every 10 min
   });
 
+  const queryClient = useQueryClient();
+
   // Query to poll update progress status
   const { data: progress } = useQuery<UpdateProgressStatus>({
     queryKey: ['updater-progress'],
@@ -57,7 +59,7 @@ export const UpdaterWidget: React.FC = () => {
     },
     refetchInterval: (query) => {
       const data = query.state.data;
-      return data?.isUpdating ? 500 : false; // Poll every 500ms when updating
+      return data?.isUpdating ? 400 : 2000; // Poll every 400ms when updating, or 2s to catch start
     },
   });
 
@@ -70,6 +72,9 @@ export const UpdaterWidget: React.FC = () => {
       if (!res.ok) throw new Error('Erro ao iniciar atualização.');
       return res.json();
     },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['updater-progress'] });
+    }
   });
 
   const isUpdating = progress?.isUpdating;

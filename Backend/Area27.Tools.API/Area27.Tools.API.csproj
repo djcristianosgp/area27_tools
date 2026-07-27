@@ -22,9 +22,9 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <NoWarn>$(NoWarn);1591</NoWarn>
-    <Version>1.0.14</Version>
-    <AssemblyVersion>1.0.14.0</AssemblyVersion>
-    <InformationalVersion>1.0.14</InformationalVersion>
+    <Version>1.0.15</Version>
+    <AssemblyVersion>1.0.15.0</AssemblyVersion>
+    <InformationalVersion>1.0.15</InformationalVersion>
   </PropertyGroup>
 
 </Project>
