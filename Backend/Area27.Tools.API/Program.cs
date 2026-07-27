@@ -6,6 +6,7 @@ using Area27.Tools.Infrastructure.Data;
 using Area27.Tools.Infrastructure.Security;
 using Area27.Tools.API.Modules.Uptime;
 using Area27.Tools.API.Modules.ServerMetrics;
+using Area27.Tools.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
@@ -50,6 +51,16 @@ builder.Services.AddAuthentication(options =>
 });
 
 builder.Services.AddAuthorization();
+
+// 2b. Register HTTP client factory (used by Rock10Service and other outbound calls)
+builder.Services.AddHttpClient("Rock10", client =>
+{
+    client.Timeout = System.TimeSpan.FromSeconds(15);
+});
+builder.Services.AddHttpClient(); // default unnamed client
+
+// 2c. Rock10 integration service
+builder.Services.AddSingleton<Rock10Service>();
 
 // 3. Configure CORS
 builder.Services.AddCors(options =>

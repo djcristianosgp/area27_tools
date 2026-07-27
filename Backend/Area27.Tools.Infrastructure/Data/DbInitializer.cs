@@ -48,54 +48,5 @@ public static class DbInitializer
             );
             context.SaveChanges();
         }
-
-        // Seed default cameras
-        if (!context.Cameras.Any())
-        {
-            context.Cameras.AddRange(
-                new Camera { Name = "Câmera Entrada Principal", RtspUrl = "rtsp://192.168.1.100/stream1", Location = "Entrada Principal", IsActive = true },
-                new Camera { Name = "Câmera Estacionamento", RtspUrl = "rtsp://192.168.1.101/stream1", Location = "Estacionamento", IsActive = true },
-                new Camera { Name = "Câmera Estúdio A", RtspUrl = "rtsp://192.168.1.102/stream1", Location = "Estúdio A", IsActive = true }
-            );
-            context.SaveChanges();
-        }
-
-        // Seed default IoT devices
-        if (!context.IotDevices.Any())
-        {
-            context.IotDevices.AddRange(
-                new IotDevice { DeviceName = "Ar Condicionado Estúdio", Topic = "estudio/ac/power", PayloadType = "Switch", LastValue = "OFF" },
-                new IotDevice { DeviceName = "Temperatura Estúdio A", Topic = "estudio/sensor/temp", PayloadType = "Sensor", LastValue = "22.5" },
-                new IotDevice { DeviceName = "Iluminação Painel Led", Topic = "estudio/iluminacao/led", PayloadType = "Switch", LastValue = "ON" }
-            );
-            context.SaveChanges();
-        }
-
-        // Seed default inventory items
-        if (!context.InventoryItems.Any())
-        {
-            context.InventoryItems.AddRange(
-                new InventoryItem { Name = "Câmera Sony FX3", SerialNumber = "SN-FX3-9921", Category = "Camera", Location = "Armário A", Status = "Available" },
-                new InventoryItem { Name = "Lente 24-70mm f2.8", SerialNumber = "SN-LNS-8812", Category = "Lente", Location = "Armário A", Status = "Available" },
-                new InventoryItem { Name = "Tripé Manfrotto 504HD", SerialNumber = "SN-TPD-0043", Category = "Acessório", Location = "Armário B", Status = "Available" },
-                new InventoryItem { Name = "Mesa de Corte ATEM Mini Pro", SerialNumber = "SN-ATM-2211", Category = "Switch", Location = "Armário C", Status = "In Use" }
-            );
-            context.SaveChanges();
-        }
-
-        // Seed default events
-        if (!context.Events.Any())
-        {
-            context.Events.Add(new Event
-            {
-                Name = "Transmissão Campeonato Estadual - Final",
-                Date = DateTime.UtcNow.AddDays(2),
-                Location = "Ginásio Central",
-                TeamMembers = "João (Câmera 1), Maria (Corte), Pedro (Áudio)",
-                Status = "Scheduled",
-                Description = "Transmissão ao vivo do jogo decisivo."
-            });
-            context.SaveChanges();
-        }
     }
 }
