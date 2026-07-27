@@ -1,12 +1,18 @@
+using System;
+using System.IO;
 using System.Text;
-using Area27.Tools.Core.Entities;
 using Area27.Tools.Core.Modules;
 using Area27.Tools.Infrastructure.Data;
 using Area27.Tools.Infrastructure.Security;
 using Area27.Tools.API.Modules.Uptime;
 using Area27.Tools.API.Modules.ServerMetrics;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,9 +70,27 @@ builder.Services.AddModuleRegistry(registry =>
     registry.RegisterModule(new ServerMetricsModule());
 });
 
+// 5. Add Controllers
+builder.Services.AddControllers();
+
+// 6. Configure Swagger/OpenAPI with XML Documentation
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new() { Title = "Area27 Tools API", Version = "v1" });
+    
+    // Configure XML comments for Swagger
+    var xmlFile = $"{System.Reflection.Assembly.GetExecutingAssembly().GetName().Name}.xml";
+    var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+    if (File.Exists(xmlPath))
+    {
+        options.IncludeXmlComments(xmlPath);
+    }
+});
+
 var app = builder.Build();
 
-// 5. Database Initialization (Auto migrations/seeds)
+// 7. Database Initialization (Auto migrations/seeds)
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
@@ -81,107 +105,36 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 6. Middleware Pipeline
+// 8. Swagger UI in Development
+if (app.Environment.IsDevelopment())
+{
+    app.UseSwagger();
+    app.UseSwaggerUI(c =>
+    {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Area27 Tools API v1");
+    });
+}
+
+// 9. Middleware Pipeline
 app.UseCors("AllowReactDev");
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 7. Base Endpoints & Authentication API
-app.MapGet("/", () => new { app = "Area27 Tools API", status = "Running" });
-
-// Authentication Routes
-app.MapPost("/api/auth/register", async (RegisterRequest request, AppDbContext db) =>
-{
-    if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
-    {
-        return Results.BadRequest(new { message = "Username and password are required." });
-    }
-
-    var existingUser = await db.Users.AnyAsync(u => u.Username == request.Username);
-    if (existingUser)
-    {
-        return Results.BadRequest(new { message = "Username is already taken." });
-    }
-
-    var newUser = new User
-    {
-        Username = request.Username,
-        PasswordHash = PasswordHasher.HashPassword(request.Password),
-        Role = "Viewer"
-    };
-
-    db.Users.Add(newUser);
-    await db.SaveChangesAsync();
-
-    return Results.Ok(new { message = "User registered successfully." });
-});
-
-app.MapPost("/api/auth/login", async (LoginRequest request, AppDbContext db, JwtTokenService tokenService) =>
-{
-    if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
-    {
-        return Results.BadRequest(new { message = "Username and password are required." });
-    }
-
-    var user = await db.Users.SingleOrDefaultAsync(u => u.Username == request.Username);
-    if (user == null || !PasswordHasher.VerifyPassword(request.Password, user.PasswordHash))
-    {
-        return Results.Unauthorized();
-    }
-
-    var token = tokenService.GenerateToken(user);
-    return Results.Ok(new
-    {
-        token,
-        user = new { username = user.Username, role = user.Role }
-    });
-});
-
-// Module Management Routes
-app.MapGet("/api/modules", async (AppDbContext db, ModuleRegistry registry) =>
-{
-    var dbModules = await db.Modules.ToListAsync();
-    
-    // Merge registered core modules with db states
-    var result = registry.Modules.Select(m => new
-    {
-        id = m.Id,
-        name = m.Name,
-        description = m.Description,
-        icon = m.Icon,
-        isEnabled = dbModules.FirstOrDefault(dm => dm.Id == m.Id)?.IsEnabled ?? true
-    });
-
-    return Results.Ok(result);
-});
-
-app.MapPost("/api/modules/{id}/toggle", async (string id, AppDbContext db) =>
-{
-    var dbModule = await db.Modules.SingleOrDefaultAsync(m => m.Id == id);
-    if (dbModule == null)
-    {
-        dbModule = new ToolModuleState
-        {
-            Id = id,
-            Name = id,
-            IsEnabled = false
-        };
-        db.Modules.Add(dbModule);
-    }
-    else
-    {
-        dbModule.IsEnabled = !dbModule.IsEnabled;
-    }
-
-    await db.SaveChangesAsync();
-    return Results.Ok(new { id = dbModule.Id, isEnabled = dbModule.IsEnabled });
-});
-
-// 8. Register Routes for all modules dynamically
-app.MapModules();
+// 10. Map Controller Endpoints
+app.MapControllers();
 
 app.Run();
 
-// Request Models
-public record RegisterRequest(string Username, string Password);
-public record LoginRequest(string Username, string Password);
+// Request Models for Authentication (referenced by AuthController)
+namespace Area27.Tools.API.Controllers
+{
+    /// <summary>
+    /// Objeto com dados para registro de novo usuário.
+    /// </summary>
+    public record RegisterRequest(string Username, string Password);
+
+    /// <summary>
+    /// Objeto com credenciais de login do usuário.
+    /// </summary>
+    public record LoginRequest(string Username, string Password);
+}
