@@ -23,24 +23,22 @@ set PACKAGE_JSON=Frontend\area27-ui\package.json
 :: 1. Atualiza Versao no .csproj
 powershell -NoProfile -Command "(Get-Content '%CSPROJ%') -replace '<Version>.*?</Version>', '<Version>%NEW_VER%</Version>' -replace '<AssemblyVersion>.*?</AssemblyVersion>', '<AssemblyVersion>%NEW_VER%.0</AssemblyVersion>' -replace '<InformationalVersion>.*?</InformationalVersion>', '<InformationalVersion>%NEW_VER%</InformationalVersion>' | Set-Content '%CSPROJ%'"
 
-if %ERRORLEVEL% EQU 0 (
-    echo [OK] Backend (.csproj) atualizado para %NEW_VER%.
-) else (
-    echo [ERRO] Falha ao atualizar %CSPROJ%.
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERRO] Falha ao atualizar backend csproj.
     pause
     exit /b 1
 )
+echo [OK] Backend csproj atualizado para %NEW_VER%.
 
 :: 2. Atualiza Versao no package.json
 powershell -NoProfile -Command "(Get-Content '%PACKAGE_JSON%') -replace '\"version\": \".*?\"', '\"version\": \"%NEW_VER%\"' | Set-Content '%PACKAGE_JSON%'"
 
-if %ERRORLEVEL% EQU 0 (
-    echo [OK] Frontend (package.json) atualizado para %NEW_VER%.
-) else (
-    echo [ERRO] Falha ao atualizar %PACKAGE_JSON%.
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERRO] Falha ao atualizar package.json.
     pause
     exit /b 1
 )
+echo [OK] Frontend package.json atualizado para %NEW_VER%.
 
 echo.
 echo Verificando compilacao do Backend...
