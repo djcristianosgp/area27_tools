@@ -36,6 +36,7 @@ graph TD
 ```
 Area27.Tools/
 ├── Backend/
+│   ├── Area27.Tools.slnx          # Arquivo de solução XML do .NET 10
 │   ├── Area27.Tools.API/           # Inicialização, Middlewares e Injeção de Dependências
 │   ├── Area27.Tools.Core/          # Abstrações base, Agendador, Notificações Globais
 │   ├── Area27.Tools.Infrastructure/ # Acesso a Banco de Dados, Wrappers de OS e Docker

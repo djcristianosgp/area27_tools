@@ -1,0 +1,41 @@
+# === .NET Core / C# ===
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+.vs/
+.idea/
+.vscode/
+
+# SQLite files
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+
+# User secrets & Local settings
+appsettings.Development.json
+appsettings.Local.json
+
+# === Node / React / Frontend ===
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.*
+!.env.example
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+*.log
+
+# Editor & OS files
+.DS_Store
+Thumbs.db
+desktop.ini

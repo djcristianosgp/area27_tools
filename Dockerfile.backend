@@ -1,0 +1,15 @@
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY ["Backend/Area27.Tools.API/Area27.Tools.API.csproj", "Backend/Area27.Tools.API/"]
+COPY ["Backend/Area27.Tools.Core/Area27.Tools.Core.csproj", "Backend/Area27.Tools.Core/"]
+COPY ["Backend/Area27.Tools.Infrastructure/Area27.Tools.Infrastructure.csproj", "Backend/Area27.Tools.Infrastructure/"]
+RUN dotnet restore "Backend/Area27.Tools.API/Area27.Tools.API.csproj"
+
+COPY . .
+WORKDIR "/src/Backend/Area27.Tools.API"
+RUN dotnet publish "Area27.Tools.API.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS final
+WORKDIR /app
+COPY --from=build /app/publish .
+ENTRYPOINT ["dotnet", "Area27.Tools.API.dll"]

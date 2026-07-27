@@ -1,0 +1,5 @@
+<Solution>
+  <Project Path="Area27.Tools.API/Area27.Tools.API.csproj" />
+  <Project Path="Area27.Tools.Core/Area27.Tools.Core.csproj" />
+  <Project Path="Area27.Tools.Infrastructure/Area27.Tools.Infrastructure.csproj" />
+</Solution>
