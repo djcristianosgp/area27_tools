@@ -13,42 +13,7 @@ public static class DbInitializer
             serviceProvider.GetRequiredService<DbContextOptions<AppDbContext>>());
 
         // Ensure database is created and migrations are applied
-        context.Database.EnsureCreated();
-
-        // Create tables manually if they don't exist (EnsureCreated won't create tables for new entities in an existing DB)
-        using (var command = context.Database.GetDbConnection().CreateCommand())
-        {
-            context.Database.OpenConnection();
-
-            // Create NetworkDevices table
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS ""NetworkDevices"" (
-                    ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    ""IpAddress"" TEXT NOT NULL,
-                    ""MacAddress"" TEXT NULL,
-                    ""Hostname"" TEXT NULL,
-                    ""Vendor"" TEXT NULL,
-                    ""LatencyMs"" REAL NULL,
-                    ""IsOnline"" INTEGER NOT NULL,
-                    ""LastSeen"" TEXT NOT NULL,
-                    ""CustomName"" TEXT NULL
-                );";
-            command.ExecuteNonQuery();
-
-            // Create SslDomains table
-            command.CommandText = @"
-                CREATE TABLE IF NOT EXISTS ""SslDomains"" (
-                    ""Id"" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
-                    ""Domain"" TEXT NOT NULL,
-                    ""Port"" INTEGER NOT NULL,
-                    ""Issuer"" TEXT NULL,
-                    ""ExpirationDate"" TEXT NULL,
-                    ""LastChecked"" TEXT NOT NULL,
-                    ""IsValid"" INTEGER NOT NULL,
-                    ""ErrorMessage"" TEXT NULL
-                );";
-            command.ExecuteNonQuery();
-        }
+        context.Database.Migrate();
 
         // Seed default admin user if not exists
         if (!context.Users.Any())
