@@ -11,6 +11,10 @@ import { DockerManagerWidget } from './DockerManagerWidget';
 import { BackupCronWidget } from './BackupCronWidget';
 import { GitDeployWidget } from './GitDeployWidget';
 import { CentralizedLogsWidget } from './CentralizedLogsWidget';
+import { CameraPanelWidget } from './CameraPanelWidget';
+import { ReplaysQrWidget } from './ReplaysQrWidget';
+import { IotMqttWidget } from './IotMqttWidget';
+import { InventoryEventsWidget } from './InventoryEventsWidget';
 import { LogOut, Settings, Eye, EyeOff, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface Module {
@@ -166,7 +170,7 @@ export const Dashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules?.map((mod) => {
-              const isWidget = mod.id === 'uptime' || mod.id === 'server-metrics' || mod.id === 'network-scanner' || mod.id === 'web-terminal' || mod.id === 'ssl-dns' || mod.id === 'docker-manager' || mod.id === 'backups-cron' || mod.id === 'git-deploy' || mod.id === 'centralized-logs';
+              const isWidget = mod.id === 'uptime' || mod.id === 'server-metrics' || mod.id === 'network-scanner' || mod.id === 'web-terminal' || mod.id === 'ssl-dns' || mod.id === 'docker-manager' || mod.id === 'backups-cron' || mod.id === 'git-deploy' || mod.id === 'centralized-logs' || mod.id === 'camera-panel' || mod.id === 'replays-qr' || mod.id === 'iot-mqtt' || mod.id === 'inventory-events';
               const isHidden = hiddenWidgets.includes(mod.id);
               return (
                 <div key={mod.id} className="bg-[#0b0c10]/40 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
@@ -283,6 +287,10 @@ export const Dashboard: React.FC = () => {
                   {widgetId === 'backups-cron' && <BackupCronWidget />}
                   {widgetId === 'git-deploy' && <GitDeployWidget />}
                   {widgetId === 'centralized-logs' && <CentralizedLogsWidget />}
+                  {widgetId === 'camera-panel' && <CameraPanelWidget />}
+                  {widgetId === 'replays-qr' && <ReplaysQrWidget />}
+                  {widgetId === 'iot-mqtt' && <IotMqttWidget />}
+                  {widgetId === 'inventory-events' && <InventoryEventsWidget />}
                 </div>
               );
             })}

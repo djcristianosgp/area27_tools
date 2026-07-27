@@ -178,6 +178,7 @@
   },
   "active": "cbe022eac75dc741",
   "lastOpenFiles": [
+    "01 - Arquitetura/Estrutura de Banco de Dados.md",
     "03 - Guia de Desenvolvimento/Setup do Ambiente.md",
     "03 - Guia de Desenvolvimento/Criação de Novo Módulo.md",
     "02 - Módulos/Utilitários e Ferramentas.md",
@@ -186,7 +187,6 @@
     "02 - Módulos/Infraestrutura e DevOps.md",
     "01 - Arquitetura/Visão Geral da Arquitetura.md",
     "01 - Arquitetura/Sistema de Módulos (IToolModule).md",
-    "01 - Arquitetura/Estrutura de Banco de Dados.md",
     "00 - Comece Aqui.md"
   ]
 }

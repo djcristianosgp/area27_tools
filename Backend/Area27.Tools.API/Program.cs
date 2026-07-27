@@ -75,6 +75,10 @@ builder.Services.AddModuleRegistry(registry =>
     registry.RegisterModule(new Area27.Tools.API.Modules.BackupCron.BackupCronModule());
     registry.RegisterModule(new Area27.Tools.API.Modules.GitDeploy.GitDeployModule());
     registry.RegisterModule(new Area27.Tools.API.Modules.CentralizedLogs.CentralizedLogsModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.CameraPanel.CameraPanelModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.ReplaysQr.ReplaysQrModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.IotMqtt.IotMqttModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.InventoryEvents.InventoryEventsModule());
 });
 
 // 5. Add Controllers

@@ -20,6 +20,11 @@ public class AppDbContext : DbContext
     public DbSet<BackupCronLog> BackupCronLogs => Set<BackupCronLog>();
     public DbSet<GitRepository> GitRepositories => Set<GitRepository>();
     public DbSet<LogSource> LogSources => Set<LogSource>();
+    public DbSet<Camera> Cameras => Set<Camera>();
+    public DbSet<IotDevice> IotDevices => Set<IotDevice>();
+    public DbSet<InventoryItem> InventoryItems => Set<InventoryItem>();
+    public DbSet<Event> Events => Set<Event>();
+    public DbSet<EventChecklistItem> EventChecklistItems => Set<EventChecklistItem>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
