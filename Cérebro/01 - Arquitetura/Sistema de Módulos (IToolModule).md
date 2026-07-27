@@ -6,7 +6,7 @@ O core do **Area27 Tools** é projetado para ser o mais enxuto possível. Toda a
 
 ## ⚙️ A Interface `IToolModule`
 
-Definida no Core do sistema, a interface obriga a exposição dos seguintes metadados e hooks de inicialização:
+Definida em `Area27.Tools.Core/Modules/IToolModule.cs`:
 
 ```csharp
 namespace Area27.Tools.Core.Modules;
@@ -18,23 +18,62 @@ public interface IToolModule
     string Name { get; }
     string Description { get; }
     string Icon { get; } // Nome do ícone Lucide correspondente no frontend
-    
-    // Configuração de Dependências
-    void RegisterServices(IServiceCollection services, IConfiguration configuration);
-    
+
+    // Configuração de Dependências (sem IConfiguration — use injeção de serviços)
+    void RegisterServices(IServiceCollection services);
+
     // Registro de Endpoints (Minimal API)
     void RegisterRoutes(IEndpointRouteBuilder endpoints);
-    
+
     // Serviços em Background
     IEnumerable<IHostedService> GetBackgroundServices();
 }
 ```
 
+> ⚠️ **Atenção**: `RegisterServices` **não** recebe `IConfiguration`. Injetar `IConfiguration` dentro de serviços via DI normal do ASP.NET Core.
+
+---
+
+## 📦 Localização dos Módulos
+
+Os módulos ficam em `Backend/Area27.Tools.API/Modules/[NomeDoModulo]/`:
+
+```
+Area27.Tools.API/
+└── Modules/
+    ├── Uptime/
+    ├── ServerMetrics/
+    ├── NetworkScanner/
+    ├── WebTerminal/
+    ├── SslDns/
+    ├── DockerManager/
+    ├── BackupCron/
+    ├── GitDeploy/
+    ├── CentralizedLogs/
+    ├── CameraPanel/
+    ├── ReplaysQr/
+    ├── IotMqtt/
+    ├── InventoryEvents/
+    └── Updater/          ← Fase 6
+```
+
+---
+
+## 🔄 Registro em `Program.cs`
+
+```csharp
+builder.Services.AddModuleRegistry(registry =>
+{
+    registry.RegisterModule(new UptimeModule());
+    registry.RegisterModule(new DockerManagerModule());
+    registry.RegisterModule(new UpdaterModule());
+    // ...
+});
+```
+
 ---
 
 ## 🔄 Ciclo de Vida e Inicialização
-
-Durante a inicialização do ASP.NET Core (`Program.cs`), o carregador de módulos realiza as seguintes etapas:
 
 ```mermaid
 sequenceDiagram
@@ -42,17 +81,14 @@ sequenceDiagram
     participant Reg as ModuleRegistry
     participant Mod as IToolModule
 
-    App->>Reg: LoadModules()
-    Note over Reg: Escaneia assemblies ou carrega lista estática
-    Reg->>Mod: RegisterServices(services, config)
-    Note over Mod: Registra DBContexts, Repositórios e Serviços locais
-    Reg->>Mod: GetBackgroundServices()
-    Note over Reg: Adiciona serviços de fundo ao HostedServices do ASP.NET
-    App->>Reg: RegisterRoutes(app)
+    App->>Reg: AddModuleRegistry(configure)
+    Reg->>Mod: RegisterServices(services)
+    Note over Mod: Registra serviços e IHostedService
+    App->>Reg: MapModules(app)
     Reg->>Mod: RegisterRoutes(endpoints)
-    Note over Mod: Registra endpoints REST (ex: /api/uptime)
+    Note over Mod: Registra endpoints REST
 ```
 
-## 🛡️ Segurança e Permissões
-- Cada rota exposta em `RegisterRoutes` pode ser protegida com base em Claims de permissão expostas pelo módulo (ex: `uptime:write`, `docker:restart`).
-- Se o módulo estiver desativado nas configurações globais (`settings`), o middleware bloqueia as rotas registradas por ele automaticamente.
+## 🛡️ Segurança
+- Rotas exposta em `RegisterRoutes` devem chamar `.RequireAuthorization()` para exigir JWT.
+- O estado de cada módulo (ativado/desativado) é gerenciado pela tabela `ToolModuleState` via `ModulesController`.

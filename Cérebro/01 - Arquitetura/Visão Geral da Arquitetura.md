@@ -8,42 +8,44 @@ O sistema foi arquitetado para rodar de forma leve e performática em servidores
 
 ```mermaid
 graph TD
-    UI[Frontend: React + Vite + Tailwind] <-->|REST / WebSockets| API[Backend: ASP.NET 10 Minimal APIs]
-    API <--> Core[Core / Scheduler]
-    API <--> Modules[Modulos Dinâmicos: IToolModule]
-    Modules <--> DB[(Banco: SQLite)]
-    Modules <--> OS[Sistema Operacional / Docker / RTSP]
+    UI[Frontend: React 19 + Vite 8 + Tailwind CSS v4] <-->|REST / WebSockets| API[Backend: ASP.NET 10 Minimal APIs & Controllers]
+    API <--> Core[Core: Entities & IToolModule]
+    API <--> Modules[Módulos Dinâmicos: Area27.Tools.API/Modules/]
+    Modules <--> Infra[Infrastructure: DatabaseProviderExtensions]
+    Infra <--> DB[(Banco: SQLite ou PostgreSQL)]
+    Modules <--> OS[Sistema Operacional / Docker / RTSP / Network / MQTT]
 ```
 
 ### Backend: ASP.NET 10 (C#)
-- **Minimal APIs**: Endpoints extremamente rápidos e com pouca sobrecarga (boilerplate).
-- **Background Tasks**: Uso nativo de `IHostedService` e `BackgroundService` para checagens de Uptime, rotinas de Backup e escuta MQTT.
-- **Single File Publish**: Possibilidade de compilar a aplicação em um executável autossuficiente único para facilitar a implantação em servidores.
+- **Minimal APIs & Controllers**: Endpoints otimizados, protegidos via JWT Bearer.
+- **Background Services**: Uso nativo de `IHostedService` e `BackgroundService` para checagens de Uptime, rotinas de Backup e workers de background.
+- **Database Abstraction**: Suporte a SQLite (padrão) e PostgreSQL configurável via `DatabaseProviderExtensions`.
+- **Auto-Update**: Módulo `UpdaterModule` para checagem via GitHub Releases API.
 
-### Frontend: React + Vite
-- **Tailwind CSS & shadcn/ui**: Para um design refinado, escuro por padrão, com componentes de alta fidelidade e micro-animações.
-- **Zustand**: Controle de estado global leve e reativo (especialmente útil para gerenciar a customização de widgets do Dashboard).
-- **React Query**: Sincronização inteligente de dados em background e cache dos estados dos servidores e câmeras.
+### Frontend: React 19 + Vite 8
+- **Tailwind CSS v4**: Para um design refinado, escuro por padrão (`#0b0c10` / `#1f2833`), com componentes de alta fidelidade e micro-animações.
+- **Zustand v5**: Controle de estado global leve e reativo (persistência de layout e visibilidade de widgets via `localStorage`).
+- **React Query v5**: Sincronização inteligente de dados em background e cache dos estados dos servidores e câmeras.
 
-### Banco de Dados: SQLite
-- **Simplificação**: Gravação em um arquivo único local, facilitando backups e replicação rápida de instâncias.
-- **Compatibilidade**: Pode ser facilmente migrado para PostgreSQL caso o projeto cresça para um ambiente multi-inquilino complexo.
+### Banco de Dados: SQLite / PostgreSQL
+- **SQLite**: Gravação em arquivo único local (`area27_tools.db`), ideal para pequenas/médias instâncias.
+- **PostgreSQL**: Suporte completo via `Npgsql.EntityFrameworkCore.PostgreSQL`, permitindo escalabilidade para ambientes maiores.
 
 ---
 
-## 📁 Estrutura de Pastas Proposta
+## 📁 Estrutura de Pastas Atual do Projeto
 
 ```
 Area27.Tools/
 ├── Backend/
-│   ├── Area27.Tools.slnx          # Arquivo de solução XML do .NET 10
-│   ├── Area27.Tools.API/           # Inicialização, Middlewares e Injeção de Dependências
-│   ├── Area27.Tools.Core/          # Abstrações base, Agendador, Notificações Globais
-│   ├── Area27.Tools.Infrastructure/ # Acesso a Banco de Dados, Wrappers de OS e Docker
-│   └── Area27.Tools.Modules/       # Implementação isolada de cada módulo
-│       ├── Uptime/
-│       ├── Cameras/
-│       └── Docker/
+│   ├── Area27.Tools.slnx             # Arquivo de solução XML do .NET 10
+│   ├── Area27.Tools.API/              # Controllers, Program.cs e Módulos
+│   │   └── Modules/                  # Módulos isolados (Uptime, Docker, Updater, etc.)
+│   ├── Area27.Tools.Core/             # Entidades de Domínio e IToolModule
+│   └── Area27.Tools.Infrastructure/   # AppDbContext, DatabaseProviderExtensions, Security
 └── Frontend/
-    └── area27-ui/                  # React + Vite Application
+    └── area27-ui/                     # Aplicação React 19 + Vite 8
+        └── src/
+            ├── components/            # Todos os Widgets e views (estrutura plana)
+            └── store/                 # Zustand Stores (authStore, dashboardStore)
 ```

@@ -1,6 +1,6 @@
 ---
 name: area27-frontend
-description: Guidelines for Area27 Tools frontend (React, Vite, Tailwind CSS, shadcn/ui, React Query, and Zustand)
+description: Guidelines for Area27 Tools frontend (React, Vite, Tailwind CSS v4, React Query, and Zustand)
 ---
 
 # Area27 Tools - Frontend Guidelines
@@ -8,26 +8,61 @@ description: Guidelines for Area27 Tools frontend (React, Vite, Tailwind CSS, sh
 This skill provides guidelines and patterns for developing the frontend of Area27 Tools using React + Vite.
 
 ## Frontend Stack
-- **Framework**: React (Vite-based)
-- **Styling**: Tailwind CSS + shadcn/ui
-- **State Management**: Zustand
-- **Data Fetching/Caching**: React Query (TanStack Query)
+- **Framework**: React 19 (Vite 8-based), TypeScript 6
+- **Styling**: Tailwind CSS v4 (PostCSS plugin — no `shadcn/ui` is currently installed)
+- **State Management**: Zustand v5
+- **Data Fetching/Caching**: React Query v5 (TanStack Query)
 - **Icons**: Lucide React
 
+> ⚠️ **shadcn/ui is referenced in docs but NOT installed.** Use raw Tailwind CSS classes directly.
+
+## Project Structure
+All source files are under `Frontend/area27-ui/src/`:
+- `App.tsx` — root: renders `<Login />` or `<Dashboard />` based on JWT token
+- `main.tsx` — entry point
+- `index.css` — global Tailwind styles
+- `components/` — **all** widget and page components live here (flat structure)
+- `store/` — Zustand stores: `authStore.ts`, `dashboardStore.ts`
+
+> There are NO `src/features/`, `src/pages/`, or `src/routes.tsx` files. No router is used.
+
 ## Key UI/UX Guidelines
+
 1. **Dashboard & Widgets**:
-   - The home page is a customizable grid layout showing active cards/widgets.
-   - Use drag-and-drop widgets to monitor infrastructure health, Docker containers, weather, cameras, and system stats.
+   - The home page is a customizable drag-and-drop grid in `Dashboard.tsx`.
+   - Widgets are enabled/disabled via the backend module registry and toggled in the Customization Panel.
+   - Widget layout and visibility are persisted in `localStorage` via `dashboardStore`.
+
 2. **Design System & Theme**:
-   - Utilize a unified dark-mode-first aesthetic with sleek card components and high readability.
-   - All styling tokens must align with shadcn/ui's theme variables.
+   - Dark-mode-first. Primary background: `bg-[#0b0c10]`. Card background: `bg-[#1f2833]`.
+   - Accent colors: `text-[#66fcf1]` (teal), borders: `border-[#45f3ff]/10`.
+   - Widget card template: `bg-[#1f2833] rounded-2xl border border-[#45f3ff]/10 p-6 shadow-xl`.
+
 3. **API Integration**:
-   - Implement queries and mutations via React Query to manage state synchronizations.
-   - Use Zustand for local client-side state (e.g., active widget layout, user preference toggles).
-4. **Responsive Layouts**:
-   - Ensure the layout is fully responsive, looking stunning on desktops, tablets, and mobile devices.
+   - Backend URL: `http://localhost:5000` (hardcoded in widgets).
+   - Always pass `Authorization: Bearer ${token}` header using `useAuthStore`.
+   - Use `useQuery` for reads, `useMutation` for writes.
 
-## Phase 6 Widgets (Polimento & Distribuição)
-- **`UpdaterWidget`**: Shows current vs. latest version (from GitHub Releases), animated update badge, expandable changelog, and refresh button. Uses `GET /api/updater/check`.
-- **`SystemSettingsWidget`**: Displays active DB provider (SQLite/PostgreSQL), runtime version, uptime counter (auto-refreshes every 30s), environment, machine name, and OS. Uses `GET /api/updater/info`.
+4. **Adding a New Widget**:
+   - Create `MyModuleWidget.tsx` in `src/components/`.
+   - Import and add it to `Dashboard.tsx` in both the `isWidget` check and the render grid.
+   - Module must be seeded in `DbInitializer.cs` to appear in the UI.
 
+## Registered Widgets (all in `Dashboard.tsx`)
+| Widget ID | Component |
+|---|---|
+| `uptime` | `UptimeWidget` |
+| `server-metrics` | `ServerMetricsWidget` |
+| `network-scanner` | `NetworkScannerWidget` |
+| `web-terminal` | `WebTerminalWidget` |
+| `ssl-dns` | `SslDnsWidget` |
+| `docker-manager` | `DockerManagerWidget` |
+| `backups-cron` | `BackupCronWidget` |
+| `git-deploy` | `GitDeployWidget` |
+| `centralized-logs` | `CentralizedLogsWidget` |
+| `camera-panel` | `CameraPanelWidget` |
+| `replays-qr` | `ReplaysQrWidget` |
+| `iot-mqtt` | `IotMqttWidget` |
+| `inventory-events` | `InventoryEventsWidget` |
+| `updater` | `UpdaterWidget` (Phase 6) |
+| `system-settings` | `SystemSettingsWidget` (Phase 6) |

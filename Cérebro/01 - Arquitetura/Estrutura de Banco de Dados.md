@@ -1,15 +1,13 @@
 # Estrutura de Banco de Dados
 
-O banco de dados oficial do **Area27 Tools** é o **SQLite**, devido à simplicidade de manutenção (arquivo único), alta performance de leitura e facilidade de backup.
+O **Area27 Tools** suporta **SQLite** (padrão) e **PostgreSQL**. A seleção do provedor é feita via `"DatabaseProvider"` no `appsettings.json`.
 
-## 🗃️ Tabelas Core
+## 🗃️ Tabelas do Sistema (Core)
 
-Estas tabelas mantêm as configurações base do sistema e a saúde operacional da plataforma.
+Gerenciadas pelo `AppDbContext` em `Infrastructure/Data/AppDbContext.cs`:
 
 ```mermaid
 erDiagram
-    SETTINGS ||--o{ MODULES : configures
-    USERS ||--o{ NOTIFICATIONS : receives
     USERS {
         int id PK
         string username
@@ -21,31 +19,70 @@ erDiagram
         string value
         string category
     }
-    MODULES {
+    TOOL_MODULE_STATE {
         string id PK
         string name
         boolean is_enabled
-        string permissions_required
     }
-    NOTIFICATIONS {
+    UPTIME_CHECKS {
         int id PK
-        string title
-        string message
-        datetime created_at
-        boolean is_read
+        string name
+        string target
+        string protocol
+        int port
+        int check_interval_seconds
+        boolean is_active
     }
+    UPTIME_HISTORY {
+        int id PK
+        int uptime_check_id FK
+        datetime checked_at
+        boolean is_up
+        int response_time_ms
+        string error
+    }
+    UPTIME_CHECKS ||--o{ UPTIME_HISTORY : generates
+    USERS }o--|| TOOL_MODULE_STATE : controls
 ```
 
-### Detalhes das Tabelas de Módulos
+## 📋 Todas as Tabelas Implementadas
 
-Cada módulo pode registrar suas próprias tabelas ou usar chaves dinâmicas na tabela global de configurações (`settings`). A infraestrutura de dados suporta:
+| DbSet | Entidade | Módulo |
+|---|---|---|
+| `Users` | `User` | Core (Auth) |
+| `Settings` | `Setting` | Core |
+| `Modules` | `ToolModuleState` | Core (ModulesController) |
+| `UptimeChecks` | `UptimeCheck` | Uptime |
+| `UptimeHistories` | `UptimeHistory` | Uptime |
+| `NetworkDevices` | `NetworkDevice` | NetworkScanner |
+| `SslDomains` | `SslDomain` | SslDns |
+| `BackupCronTasks` | `BackupCronTask` | BackupCron |
+| `BackupCronLogs` | `BackupCronLog` | BackupCron |
+| `GitRepositories` | `GitRepository` | GitDeploy |
+| `LogSources` | `LogSource` | CentralizedLogs |
+| `Cameras` | `Camera` | CameraPanel |
+| `IotDevices` | `IotDevice` | IotMqtt |
+| `InventoryItems` | `InventoryItem` | InventoryEvents |
+| `Events` | `Event` | InventoryEvents |
+| `EventChecklistItems` | `EventChecklistItem` | InventoryEvents |
 
-1. **`uptime_checks`**: Cadastro de URLs e IPs monitorados, protocolo de teste e frequência.
-2. **`uptime_history`**: Registros de tempo de resposta e falhas para renderização de gráficos.
-3. **`cameras`**: URLs RTSP, credenciais de acesso e configurações de canal.
-4. **`devices`**: Inventário físico e descobertas da rede local (IP, MAC, Hostname).
-5. **`backups`**: Histórico de rotinas executadas e status do envio para nuvem (S3/Drive).
+> ⚠️ Não existe tabela `NOTIFICATIONS` — foi removida do escopo.
 
-## 🚀 Estratégia de Migração e Escalabilidade
-- **EF Core Migrations**: Utilizaremos Migrations normais gerenciadas pelo Core.
-- **Transição para PostgreSQL**: Se o projeto precisar crescer e ser hospedado de forma distribuída, a stack ASP.NET Core permite alterar o Provider do Banco de Dados em `Program.cs` com apenas uma linha de alteração, mantendo 95% do código SQL intacto.
+## 🗄️ Troca de Provedor (SQLite ↔ PostgreSQL)
+
+Altere `appsettings.json`:
+```json
+{
+  "DatabaseProvider": "postgresql",
+  "ConnectionStrings": {
+    "PostgreSQL": "Host=localhost;Port=5432;Database=area27_tools;Username=postgres;Password=changeme"
+  }
+}
+```
+O EF Core cria as tabelas automaticamente no restart via `context.Database.Migrate()` em `DbInitializer.Initialize()`.
+
+## 🚀 Inicialização Automática
+O `DbInitializer.Initialize()` garante:
+1. `context.Database.Migrate()` — aplica migrations/cria schema
+2. Seed do usuário admin padrão (`admin` / `admin`)
+3. Seed do estado de todos os módulos (`ToolModuleState`)

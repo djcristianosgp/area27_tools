@@ -1,26 +1,27 @@
 ---
 name: area27-core
-description: Guidelines for Area27 Tools backend (ASP.NET 10, SQLite, Architecture, and IToolModule)
+description: Guidelines for Area27 Tools backend (ASP.NET 10, SQLite/PostgreSQL, Architecture, and IToolModule)
 ---
 
 # Area27 Tools - Backend & Core Guidelines
 
-This skill provides guidelines and patterns for developing the backend of Area27 Tools using ASP.NET 10 and SQLite, following a modular architecture.
+This skill provides guidelines and patterns for developing the backend of Area27 Tools using ASP.NET 10, following a modular architecture with support for SQLite and PostgreSQL.
 
 ## Backend Stack
 - **Framework**: ASP.NET 10 (Web API + Minimal API)
-- **Database**: SQLite with Entity Framework Core (EF Core) or Dapper
+- **Database**: SQLite (default) or PostgreSQL — both via Entity Framework Core (EF Core)
 - **OS compatibility**: Windows, Linux (Docker-friendly)
 
 ## Project Structure
-The backend is structured under `Area27.Tools`:
-- **API**: Minimal API endpoints, routing registration, and middleware.
-- **Core**: Domain models, common interfaces, background scheduling system.
-- **Modules**: Contain all feature modules (e.g., Uptime, Docker, Cameras).
-- **Infrastructure**: Database context (SQLite), file storage, and OS communication wrapper.
+The backend solution (`Area27.Tools.slnx`) is under `Backend/` with three projects:
+- **`Area27.Tools.API/`**: `Program.cs`, Minimal API Controllers, and all Modules folders.
+- **`Area27.Tools.Core/`**: Domain entities, `IToolModule` interface, `ModuleRegistry`.
+- **`Area27.Tools.Infrastructure/`**: `AppDbContext`, `DbInitializer`, `DatabaseProviderExtensions`, security utilities.
+
+> ⚠️ Modules live inside `Area27.Tools.API/Modules/[ModuleName]/`, NOT in a separate project.
 
 ## Module System (`IToolModule`)
-Every tool/module must implement the `IToolModule` interface. This keeps the core slim and makes it easy to register new tools dynamically:
+Every tool/module must implement the `IToolModule` interface:
 
 ```csharp
 public interface IToolModule
@@ -28,27 +29,38 @@ public interface IToolModule
     string Id { get; }
     string Name { get; }
     string Description { get; }
-    string Icon { get; }
-    
-    void RegisterServices(IServiceCollection services);
+    string Icon { get; }       // Lucide React icon name used by the frontend
+
+    void RegisterServices(IServiceCollection services);   // NO IConfiguration param
     void RegisterRoutes(IEndpointRouteBuilder endpoints);
     IEnumerable<IHostedService> GetBackgroundServices();
 }
 ```
 
+### Registering a Module in `Program.cs`
+```csharp
+builder.Services.AddModuleRegistry(registry =>
+{
+    registry.RegisterModule(new MyModule());
+    // ...
+});
+```
+
 ### Module Guidelines
-1. **Isolation**: A module should not directly reference another module. Use events or mediator patterns if inter-module communication is needed.
-2. **Self-contained**: Keep module-specific database entities, business logic, and background tasks inside the module's folder.
-3. **Database migrations**: Each module must define its tables inside the central SQLite database but handle its schema requirements via clean initializers or migrations.
+1. **Isolation**: A module should not directly reference another module.
+2. **Self-contained**: Keep entities, business logic, and background tasks inside the module folder.
+3. **Database**: Declare new `DbSet<T>` properties in `AppDbContext` and seed state in `DbInitializer`.
 
 ## Database Provider
-The project uses `DatabaseProviderExtensions.AddArea27Database()` in `Program.cs` to select the database provider based on `appsettings.json`:
-- `"DatabaseProvider": "sqlite"` → uses SQLite (default, retrocompatível)
-- `"DatabaseProvider": "postgresql"` → uses PostgreSQL (requires `ConnectionStrings:PostgreSQL`)
+The project uses `DatabaseProviderExtensions.AddArea27Database()` in `Program.cs`:
+- `"DatabaseProvider": "sqlite"` → SQLite (default, zero config)
+- `"DatabaseProvider": "postgresql"` → PostgreSQL (requires `ConnectionStrings:PostgreSQL`)
 
-Never call `AddDbContext<AppDbContext>()` directly — always use `AddArea27Database()`.
+**Never** call `AddDbContext<AppDbContext>()` directly — always use `AddArea27Database()`.
 
 ## Version & Auto-Update
-- The backend version is set in `Area27.Tools.API.csproj` via `<InformationalVersion>`.
-- `UpdaterModule` (ID: `updater`) exposes `GET /api/updater/check` (GitHub Releases comparison) and `GET /api/updater/info` (system metadata).
-- To configure: set `Updater:GitHubOwner` and `Updater:GitHubRepo` in `appsettings.json`.
+- Backend version is defined in `Area27.Tools.API.csproj` via `<InformationalVersion>`.
+- `UpdaterModule` (ID: `updater`) exposes:
+  - `GET /api/updater/check` — compares current version vs. latest GitHub Release
+  - `GET /api/updater/info` — returns version, uptime, environment, DB provider, machine, OS
+- Configure via `appsettings.json`: `Updater:GitHubOwner` and `Updater:GitHubRepo`.
