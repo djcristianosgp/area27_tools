@@ -11,7 +11,16 @@ services:
       - backend-data:/app/data
     environment:
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/area27_tools.db
-      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_ENVIRONMENT=Development
+
+  frontend:
+    build:
+      context: ./Frontend/area27-ui
+      dockerfile: Dockerfile
+    ports:
+      - "80:80" # Maps local port 80 to the container Nginx port 80
+    depends_on:
+      - backend
 
 volumes:
   backend-data:

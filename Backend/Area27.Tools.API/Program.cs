@@ -56,7 +56,7 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowReactDev", policy =>
     {
-        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173")
+        policy.WithOrigins("http://localhost:5173", "http://127.0.0.1:5173", "http://localhost", "http://127.0.0.1")
               .AllowAnyHeader()
               .AllowAnyMethod()
               .AllowCredentials();
@@ -105,15 +105,12 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// 8. Swagger UI in Development
-if (app.Environment.IsDevelopment())
+// 8. Swagger UI
+app.UseSwagger();
+app.UseSwaggerUI(c =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
-    {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Area27 Tools API v1");
-    });
-}
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Area27 Tools API v1");
+});
 
 // 9. Middleware Pipeline
 app.UseCors("AllowReactDev");
