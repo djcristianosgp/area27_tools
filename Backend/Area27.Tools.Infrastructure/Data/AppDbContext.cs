@@ -16,6 +16,10 @@ public class AppDbContext : DbContext
     public DbSet<UptimeHistory> UptimeHistories => Set<UptimeHistory>();
     public DbSet<NetworkDevice> NetworkDevices => Set<NetworkDevice>();
     public DbSet<SslDomain> SslDomains => Set<SslDomain>();
+    public DbSet<BackupCronTask> BackupCronTasks => Set<BackupCronTask>();
+    public DbSet<BackupCronLog> BackupCronLogs => Set<BackupCronLog>();
+    public DbSet<GitRepository> GitRepositories => Set<GitRepository>();
+    public DbSet<LogSource> LogSources => Set<LogSource>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

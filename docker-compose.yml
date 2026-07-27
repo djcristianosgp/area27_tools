@@ -9,6 +9,7 @@ services:
       - "5000:8080" # Maps local port 5000 to the container ASP.NET port 8080
     volumes:
       - backend-data:/app/data
+      - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - ConnectionStrings__DefaultConnection=Data Source=/app/data/area27_tools.db
       - ASPNETCORE_ENVIRONMENT=Development

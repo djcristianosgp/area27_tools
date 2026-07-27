@@ -36,7 +36,11 @@ public static class DbInitializer
                 new ToolModuleState { Id = "server-metrics", Name = "Monitoramento do Servidor", IsEnabled = true },
                 new ToolModuleState { Id = "network-scanner", Name = "Rede Local (Scanner)", IsEnabled = true },
                 new ToolModuleState { Id = "web-terminal", Name = "Terminal Web (SSH)", IsEnabled = true },
-                new ToolModuleState { Id = "ssl-dns", Name = "Certificados SSL & DNS", IsEnabled = true }
+                new ToolModuleState { Id = "ssl-dns", Name = "Certificados SSL & DNS", IsEnabled = true },
+                new ToolModuleState { Id = "docker-manager", Name = "Docker Manager", IsEnabled = true },
+                new ToolModuleState { Id = "backups-cron", Name = "Backups & Agendador (Cron)", IsEnabled = true },
+                new ToolModuleState { Id = "git-deploy", Name = "Git & Deploy Automatizado", IsEnabled = true },
+                new ToolModuleState { Id = "centralized-logs", Name = "Logs Centralizados", IsEnabled = true }
             );
             context.SaveChanges();
         }

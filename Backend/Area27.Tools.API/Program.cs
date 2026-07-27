@@ -71,6 +71,10 @@ builder.Services.AddModuleRegistry(registry =>
     registry.RegisterModule(new Area27.Tools.API.Modules.NetworkScanner.NetworkScannerModule());
     registry.RegisterModule(new Area27.Tools.API.Modules.WebTerminal.WebTerminalModule());
     registry.RegisterModule(new Area27.Tools.API.Modules.SslDns.SslDnsModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.DockerManager.DockerManagerModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.BackupCron.BackupCronModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.GitDeploy.GitDeployModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.CentralizedLogs.CentralizedLogsModule());
 });
 
 // 5. Add Controllers
