@@ -6,7 +6,7 @@ echo Area27 Tools - Automacao de Versao e Release
 echo ===================================================
 echo.
 
-set /p NEW_VER="Digite o numero da nova versao (ex: 1.0.8): "
+set /p NEW_VER="Digite o numero da nova versao (ex: 1.0.10): "
 
 if "%NEW_VER%"=="" (
     echo [ERRO] Nenhuma versao foi informada. Operacao cancelada.
@@ -15,8 +15,8 @@ if "%NEW_VER%"=="" (
 )
 
 echo.
-set /p NOTES="Digite as notas da release (ex: Melhores no dashboard e correcoes): "
-if "!NOTES!"=="" set NOTES=Atualizacoes de seguranca e melhorias de desempenho.
+set /p NOTES="Digite as notas da release: "
+if "%NOTES%"=="" set NOTES=Atualizacoes de seguranca e melhorias de desempenho.
 
 echo.
 echo Atualizando versao para: v%NEW_VER%...
@@ -76,26 +76,13 @@ if /i "%PUSH_NOW%"=="S" (
     echo Enviando alteracoes e tags para o GitHub...
     git push origin main
     git push origin "v%NEW_VER%"
-
-    :: Verifica se a CLI do GitHub (gh) esta instalada
-    where gh >nul 2>nul
-    if !ERRORLEVEL! EQU 0 (
-        echo.
-        echo 🚀 Criando Release no GitHub via gh CLI...
-        gh release create "v%NEW_VER%" --title "Release v%NEW_VER%" --notes "%NOTES%"
-        if !ERRORLEVEL! EQU 0 (
-            echo [OK] Release v%NEW_VER% criada com sucesso no GitHub!
-        ) else (
-            echo [AVISO] Nao foi possivel criar a release via gh CLI.
-        )
-    ) else (
-        echo.
-        echo [INFO] GitHub CLI (gh) nao encontrada. Abrindo navegador para publicar a Release...
-        start https://github.com/djcristianosgp/area27_tools/releases/new?tag=v%NEW_VER%^&title=Release%%20v%NEW_VER%
-    )
+    
+    echo.
+    echo Abrindo navegador para publicar a Release no GitHub...
+    powershell -NoProfile -Command "Start-Process 'https://github.com/djcristianosgp/area27_tools/releases/new?tag=v%NEW_VER%&title=Release%%20v%NEW_VER%'"
 
     echo.
-    echo Release v%NEW_VER% enviada com sucesso!
+    echo Commit e Tag v%NEW_VER% enviados para o GitHub!
 ) else (
     echo.
     echo Alteracoes salvas localmente. Para enviar depois, execute:
