@@ -6,6 +6,7 @@ using Area27.Tools.Infrastructure.Data;
 using Area27.Tools.Infrastructure.Security;
 using Area27.Tools.API.Modules.Uptime;
 using Area27.Tools.API.Modules.ServerMetrics;
+using Area27.Tools.API.Modules.Updater;
 using Area27.Tools.API.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
@@ -18,10 +19,8 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Configure SQLite Database
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection") ?? "Data Source=area27_tools.db";
-builder.Services.AddDbContext<AppDbContext>(options =>
-    options.UseSqlite(connectionString));
+// 1. Configure Database (SQLite or PostgreSQL based on config)
+builder.Services.AddArea27Database(builder.Configuration);
 
 // 2. Configure JWT Authentication
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
@@ -90,6 +89,7 @@ builder.Services.AddModuleRegistry(registry =>
     registry.RegisterModule(new Area27.Tools.API.Modules.ReplaysQr.ReplaysQrModule());
     registry.RegisterModule(new Area27.Tools.API.Modules.IotMqtt.IotMqttModule());
     registry.RegisterModule(new Area27.Tools.API.Modules.InventoryEvents.InventoryEventsModule());
+    registry.RegisterModule(new UpdaterModule());
 });
 
 // 5. Add Controllers

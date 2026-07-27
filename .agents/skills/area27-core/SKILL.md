@@ -25,12 +25,14 @@ Every tool/module must implement the `IToolModule` interface. This keeps the cor
 ```csharp
 public interface IToolModule
 {
+    string Id { get; }
     string Name { get; }
+    string Description { get; }
     string Icon { get; }
-    void RegisterRoutes(IEndpointRouteBuilder endpoints);
+    
     void RegisterServices(IServiceCollection services);
-    IEnumerable<BackgroundService> GetBackgroundServices();
-    IEnumerable<string> RequiredPermissions { get; }
+    void RegisterRoutes(IEndpointRouteBuilder endpoints);
+    IEnumerable<IHostedService> GetBackgroundServices();
 }
 ```
 
@@ -38,3 +40,15 @@ public interface IToolModule
 1. **Isolation**: A module should not directly reference another module. Use events or mediator patterns if inter-module communication is needed.
 2. **Self-contained**: Keep module-specific database entities, business logic, and background tasks inside the module's folder.
 3. **Database migrations**: Each module must define its tables inside the central SQLite database but handle its schema requirements via clean initializers or migrations.
+
+## Database Provider
+The project uses `DatabaseProviderExtensions.AddArea27Database()` in `Program.cs` to select the database provider based on `appsettings.json`:
+- `"DatabaseProvider": "sqlite"` → uses SQLite (default, retrocompatível)
+- `"DatabaseProvider": "postgresql"` → uses PostgreSQL (requires `ConnectionStrings:PostgreSQL`)
+
+Never call `AddDbContext<AppDbContext>()` directly — always use `AddArea27Database()`.
+
+## Version & Auto-Update
+- The backend version is set in `Area27.Tools.API.csproj` via `<InformationalVersion>`.
+- `UpdaterModule` (ID: `updater`) exposes `GET /api/updater/check` (GitHub Releases comparison) and `GET /api/updater/info` (system metadata).
+- To configure: set `Updater:GitHubOwner` and `Updater:GitHubRepo` in `appsettings.json`.

@@ -76,10 +76,15 @@ Este documento define as etapas de desenvolvimento do Area27 Tools, evoluindo de
 
 ---
 
-## 🚀 Fase 6: Polimento & Distribuição
+## ✅ Fase 6: Polimento & Distribuição *(Concluída)*
 *Objetivo: Facilitar a manutenção, atualizações e escalabilidade.*
 
-1. **Sistema de Atualizações Automáticas**
-   - Checagem automática via GitHub Releases e auto-update do executável backend.
-2. **Suporte Multi-Banco (PostgreSQL)**
-   - Possibilidade de migração facilitada das tabelas para PostgreSQL para ambientes maiores.
+1. **Sistema de Atualizações Automáticas** ✅
+   - Checagem automática via GitHub Releases e comparação semver com a versão atual do assembly.
+   - Widget `UpdaterWidget` com badge animado, changelog expandível e botão "Verificar agora".
+   - Endpoints: `GET /api/updater/check` e `GET /api/updater/info`.
+2. **Suporte Multi-Banco (PostgreSQL)** ✅
+   - `DatabaseProviderExtensions` lê `"DatabaseProvider"` do config e injeta SQLite ou PostgreSQL.
+   - Zero breaking changes — SQLite continua como padrão.
+   - Widget `SystemSettingsWidget` exibe provedor ativo, uptime, versão e ambiente.
+

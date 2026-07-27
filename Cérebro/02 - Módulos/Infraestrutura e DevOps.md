@@ -54,3 +54,35 @@ Gerenciamento de tarefas de proteção a dados.
 
 * **Agendador (Cron)**: Motor interno para execução periódica de scripts, limpezas ou backups.
 * **Destinos de Backup**: Compacta diretórios e envia para servidores NAS locais, FTP, ou nuvens (AWS S3, Google Drive, OneDrive).
+
+---
+
+## 🔄 7. Atualizações Automáticas (Auto-Updater)
+Mantém o sistema atualizado com o mínimo de intervenção manual.
+
+* **Verificação**: Consulta a GitHub Releases API (`/repos/{owner}/{repo}/releases/latest`) e compara a `tag_name` com a versão atual do assembly (`AssemblyInformationalVersion`).
+* **Exibição**: Widget no dashboard mostra versão atual vs. mais recente, badge animado quando há update, e changelog expandível direto da release.
+* **Configuração** em `appsettings.json`:
+  ```json
+  "Updater": {
+    "GitHubOwner": "seu-usuario",
+    "GitHubRepo": "area27_tools",
+    "Channel": "stable"
+  }
+  ```
+* **Endpoint**: `GET /api/updater/check` — retorna `UpdateCheckResult` com flag `updateAvailable`.
+
+---
+
+## 🗄️ 8. Suporte Multi-Banco (PostgreSQL)
+Permite escalabilidade para ambientes maiores sem reescrever código.
+
+* **Abstração**: `DatabaseProviderExtensions.AddArea27Database()` lê `"DatabaseProvider"` do config e injeta SQLite ou PostgreSQL no `AppDbContext`.
+* **Padrão**: SQLite (retrocompatível, zero impacto para setups existentes).
+* **Migração para PostgreSQL**:
+  1. Instalar PostgreSQL e criar o banco `area27_tools`.
+  2. Alterar `appsettings.json`: `"DatabaseProvider": "postgresql"`.
+  3. Preencher `ConnectionStrings:PostgreSQL` com as credenciais.
+  4. Reiniciar o backend — EF Core cria as tabelas automaticamente.
+* **Widget**: `SystemSettingsWidget` exibe o provider ativo, status de conexão e informações de runtime.
+

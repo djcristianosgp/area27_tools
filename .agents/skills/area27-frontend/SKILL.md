@@ -26,3 +26,8 @@ This skill provides guidelines and patterns for developing the frontend of Area2
    - Use Zustand for local client-side state (e.g., active widget layout, user preference toggles).
 4. **Responsive Layouts**:
    - Ensure the layout is fully responsive, looking stunning on desktops, tablets, and mobile devices.
+
+## Phase 6 Widgets (Polimento & Distribuição)
+- **`UpdaterWidget`**: Shows current vs. latest version (from GitHub Releases), animated update badge, expandable changelog, and refresh button. Uses `GET /api/updater/check`.
+- **`SystemSettingsWidget`**: Displays active DB provider (SQLite/PostgreSQL), runtime version, uptime counter (auto-refreshes every 30s), environment, machine name, and OS. Uses `GET /api/updater/info`.
+
