@@ -68,6 +68,9 @@ builder.Services.AddModuleRegistry(registry =>
 {
     registry.RegisterModule(new UptimeModule());
     registry.RegisterModule(new ServerMetricsModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.NetworkScanner.NetworkScannerModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.WebTerminal.WebTerminalModule());
+    registry.RegisterModule(new Area27.Tools.API.Modules.SslDns.SslDnsModule());
 });
 
 // 5. Add Controllers
@@ -114,6 +117,7 @@ app.UseSwaggerUI(c =>
 
 // 9. Middleware Pipeline
 app.UseCors("AllowReactDev");
+app.UseWebSockets();
 app.UseAuthentication();
 app.UseAuthorization();
 

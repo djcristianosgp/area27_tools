@@ -14,6 +14,8 @@ public class AppDbContext : DbContext
     public DbSet<ToolModuleState> Modules => Set<ToolModuleState>();
     public DbSet<UptimeCheck> UptimeChecks => Set<UptimeCheck>();
     public DbSet<UptimeHistory> UptimeHistories => Set<UptimeHistory>();
+    public DbSet<NetworkDevice> NetworkDevices => Set<NetworkDevice>();
+    public DbSet<SslDomain> SslDomains => Set<SslDomain>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

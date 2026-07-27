@@ -4,6 +4,9 @@ import { useAuthStore } from '../store/authStore';
 import { useDashboardStore } from '../store/dashboardStore';
 import { UptimeWidget } from './UptimeWidget';
 import { ServerMetricsWidget } from './ServerMetricsWidget';
+import { NetworkScannerWidget } from './NetworkScannerWidget';
+import { WebTerminalWidget } from './WebTerminalWidget';
+import { SslDnsWidget } from './SslDnsWidget';
 import { LogOut, Settings, Eye, EyeOff, ArrowLeft, ArrowRight } from 'lucide-react';
 
 interface Module {
@@ -159,7 +162,7 @@ export const Dashboard: React.FC = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {modules?.map((mod) => {
-              const isWidget = mod.id === 'uptime' || mod.id === 'server-metrics';
+              const isWidget = mod.id === 'uptime' || mod.id === 'server-metrics' || mod.id === 'network-scanner' || mod.id === 'web-terminal' || mod.id === 'ssl-dns';
               const isHidden = hiddenWidgets.includes(mod.id);
               return (
                 <div key={mod.id} className="bg-[#0b0c10]/40 p-4 rounded-xl border border-gray-800 flex flex-col justify-between">
@@ -269,6 +272,9 @@ export const Dashboard: React.FC = () => {
 
                   {widgetId === 'uptime' && <UptimeWidget />}
                   {widgetId === 'server-metrics' && <ServerMetricsWidget />}
+                  {widgetId === 'network-scanner' && <NetworkScannerWidget />}
+                  {widgetId === 'web-terminal' && <WebTerminalWidget />}
+                  {widgetId === 'ssl-dns' && <SslDnsWidget />}
                 </div>
               );
             })}
