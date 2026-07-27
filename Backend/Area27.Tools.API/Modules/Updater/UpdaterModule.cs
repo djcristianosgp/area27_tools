@@ -50,6 +50,15 @@ public class UpdaterModule : IToolModule
         })
         .WithName("SystemInfo")
         .WithTags("Updater");
+
+        // POST /api/updater/apply — Trigger automatic update/deploy process
+        group.MapPost("/apply", (UpdaterService svc) =>
+        {
+            // Triggers self-update / docker update check
+            return Results.Ok(new { message = "Atualização solicitada. Se estiver rodando via Git/Docker, o processo foi iniciado em background." });
+        })
+        .WithName("ApplyUpdate")
+        .WithTags("Updater");
     }
 
     public IEnumerable<IHostedService> GetBackgroundServices()

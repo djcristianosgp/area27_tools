@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation } from '@tanstack/react-query';
 import { useAuthStore } from '../store/authStore';
-import { RefreshCw, CheckCircle, AlertTriangle, ExternalLink, Loader2, Info } from 'lucide-react';
+import { RefreshCw, CheckCircle, AlertTriangle, ExternalLink, Loader2, Info, Download } from 'lucide-react';
 
 interface UpdateCheckResult {
   currentVersion: string;
@@ -17,8 +17,12 @@ const API = 'http://localhost:5000';
 export const UpdaterWidget: React.FC = () => {
   const { token } = useAuthStore();
   const [showChangelog, setShowChangelog] = useState(false);
+  const [applyMessage, setApplyMessage] = useState<string | null>(null);
 
-  const headers = { Authorization: `Bearer ${token}` };
+  const headers = {
+    'Content-Type': 'application/json',
+    Authorization: `Bearer ${token}`
+  };
 
   const {
     data: update,
@@ -34,6 +38,21 @@ export const UpdaterWidget: React.FC = () => {
       return res.json();
     },
     staleTime: 1000 * 60 * 10, // Re-check every 10 min
+  });
+
+  const applyMutation = useMutation({
+    mutationFn: async () => {
+      const res = await fetch(`${API}/api/updater/apply`, {
+        method: 'POST',
+        headers
+      });
+      if (!res.ok) throw new Error('Erro ao iniciar atualização.');
+      return res.json();
+    },
+    onSuccess: (data) => {
+      setApplyMessage(data.message);
+      setTimeout(() => setApplyMessage(null), 8000);
+    }
   });
 
   return (
@@ -107,6 +126,13 @@ export const UpdaterWidget: React.FC = () => {
             </div>
           </div>
 
+          {/* Apply Message Notice */}
+          {applyMessage && (
+            <div className="bg-emerald-950/40 border border-emerald-500/30 text-emerald-300 text-xs p-3 rounded-xl">
+              {applyMessage}
+            </div>
+          )}
+
           {/* Changelog Preview */}
           {update.updateAvailable && update.releaseNotes && (
             <div>
@@ -118,7 +144,7 @@ export const UpdaterWidget: React.FC = () => {
                 {showChangelog ? 'Ocultar' : 'Ver'} changelog
               </button>
               {showChangelog && (
-                <div className="mt-2 max-h-32 overflow-y-auto text-[10px] text-gray-300 bg-[#0b0c10]/70 rounded-lg border border-gray-800 p-3 leading-relaxed whitespace-pre-wrap">
+                <div className="mt-2 max-h-32 overflow-y-auto text-[10px] text-gray-300 bg-[#0b0c10]/70 rounded-lg border border-gray-800 p-3 leading-relaxed whitespace-pre-wrap font-mono">
                   {update.releaseNotes}
                 </div>
               )}
@@ -126,7 +152,22 @@ export const UpdaterWidget: React.FC = () => {
           )}
 
           {/* Actions */}
-          <div className="flex gap-2 mt-auto">
+          <div className="flex flex-wrap gap-2 mt-auto">
+            {update.updateAvailable && (
+              <button
+                onClick={() => applyMutation.mutate()}
+                disabled={applyMutation.isPending}
+                className="flex items-center gap-2 w-full justify-center py-2.5 px-3 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs transition shadow-lg disabled:opacity-50"
+              >
+                {applyMutation.isPending ? (
+                  <Loader2 size={14} className="animate-spin" />
+                ) : (
+                  <Download size={14} />
+                )}
+                Instalar Atualização (v{update.latestVersion})
+              </button>
+            )}
+
             <button
               onClick={() => refetch()}
               disabled={isFetching}
