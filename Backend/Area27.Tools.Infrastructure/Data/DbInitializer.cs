@@ -44,7 +44,9 @@ public static class DbInitializer
                 new ToolModuleState { Id = "camera-panel", Name = "Painel de Câmeras", IsEnabled = true },
                 new ToolModuleState { Id = "replays-qr", Name = "Replays (Rock10) & QR Code", IsEnabled = true },
                 new ToolModuleState { Id = "iot-mqtt", Name = "Painel IoT (MQTT)", IsEnabled = true },
-                new ToolModuleState { Id = "inventory-events", Name = "Inventário & Eventos", IsEnabled = true }
+                new ToolModuleState { Id = "inventory-events", Name = "Inventário & Eventos", IsEnabled = true },
+                new ToolModuleState { Id = "updater", Name = "Atualizações do Sistema", IsEnabled = true },
+                new ToolModuleState { Id = "system-settings", Name = "Configurações do Sistema", IsEnabled = true }
             );
             context.SaveChanges();
         }

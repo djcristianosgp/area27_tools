@@ -140,8 +140,9 @@ app.UseWebSockets();
 app.UseAuthentication();
 app.UseAuthorization();
 
-// 10. Map Controller Endpoints
+// 10. Map Controller & Module Endpoints
 app.MapControllers();
+app.MapModules();
 
 app.Run();
 

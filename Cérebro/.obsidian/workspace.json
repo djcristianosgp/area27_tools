@@ -4,17 +4,17 @@
     "type": "split",
     "children": [
       {
-        "id": "14d87a0b29a8b557",
+        "id": "bf99d7345a1bdf03",
         "type": "tabs",
         "children": [
           {
-            "id": "cbe022eac75dc741",
+            "id": "1956c7d325c01f5a",
             "type": "leaf",
             "state": {
-              "type": "graph",
+              "type": "empty",
               "state": {},
-              "icon": "lucide-git-fork",
-              "title": "Visualização em gráfico"
+              "icon": "lucide-file",
+              "title": "Nova aba"
             }
           }
         ]
@@ -176,13 +176,13 @@
       "bases:Criar nova base": false
     }
   },
-  "active": "cbe022eac75dc741",
+  "active": "1956c7d325c01f5a",
   "lastOpenFiles": [
+    "03 - Guia de Desenvolvimento/Criação de Novo Módulo.md",
     "01 - Arquitetura/Estrutura de Banco de Dados.md",
     "03 - Guia de Desenvolvimento/Atualizações e Distribuição.md",
     "02 - Módulos/Utilitários e Ferramentas.md",
     "03 - Guia de Desenvolvimento/Setup do Ambiente.md",
-    "03 - Guia de Desenvolvimento/Criação de Novo Módulo.md",
     "02 - Módulos/Operações e Negócios.md",
     "02 - Módulos/Monitoramento e Rede.md",
     "02 - Módulos/Infraestrutura e DevOps.md",
